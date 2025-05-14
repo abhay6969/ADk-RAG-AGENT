@@ -12,10 +12,11 @@ from ..config import (
 )
 from .utils import check_corpus_exists
 
+
 def create_corpus(
-        corpus_name: str,
-        tool_context: ToolContext,
-)->dict:
+    corpus_name: str,
+    tool_context: ToolContext,
+) -> dict:
     """
     Create a new Vertex AI RAG corpus with the specified name.
 
@@ -26,27 +27,35 @@ def create_corpus(
     Returns:
         dict: Status information about the operation
     """
-    if check_corpus_exists(corpus_name,tool_context):
-        return{
-            "status":"info",
-            "message":f"Corpus '{corpus_name}' already exists.",
-            "corpus_name":corpus_name,
-            "corpus_created":False,
+    # Check if corpus already exists
+    if check_corpus_exists(corpus_name, tool_context):
+        return {
+            "status": "info",
+            "message": f"Corpus '{corpus_name}' already exists",
+            "corpus_name": corpus_name,
+            "corpus_created": False,
         }
+
     try:
+        # Clean corpus name for use as display name
         display_name = re.sub(r"[^a-zA-Z0-9_-]", "_", corpus_name)
-        embedding_model_config = rag.RagEmbeddingModelConfig(vertex_prediction_endpoint=rag.VertexPredictionEndpoint(
-            publisher_model=DEFAULT_EMBEDDING_MODEL,
-        ))
-        rag_corpus = rag.create_corpus(
-            display_name=display_name,
-            backend_config=rag.RagVectorDbConfig(
-                rag_embedding_model_config=embedding_model_config,
-            
+
+        # Configure embedding model
+        embedding_model_config = rag.RagEmbeddingModelConfig(
+            vertex_prediction_endpoint=rag.VertexPredictionEndpoint(
+                publisher_model=DEFAULT_EMBEDDING_MODEL
             )
         )
 
-       # Update state to track corpus existence
+        # Create the corpus
+        rag_corpus = rag.create_corpus(
+            display_name=display_name,
+            backend_config=rag.RagVectorDbConfig(
+                rag_embedding_model_config=embedding_model_config
+            ),
+        )
+
+        # Update state to track corpus existence
         tool_context.state[f"corpus_exists_{corpus_name}"] = True
 
         # Set this as the current corpus
@@ -59,10 +68,11 @@ def create_corpus(
             "display_name": rag_corpus.display_name,
             "corpus_created": True,
         }
+
     except Exception as e:
         return {
             "status": "error",
-            "message": f"Failed to create corpus '{corpus_name}': {str(e)}",
+            "message": f"Error creating corpus: {str(e)}",
             "corpus_name": corpus_name,
             "corpus_created": False,
         }

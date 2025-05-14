@@ -6,22 +6,23 @@ from .tools.delete_corpus import delete_corpus
 from .tools.delete_document import delete_document
 from .tools.get_corpus_info import get_corpus_info
 from .tools.list_corpora import list_corpora
-from .tools.rag_query import rag_query  
+from .tools.rag_query import rag_query
 
 root_agent = Agent(
-    name="RAGAGENT",
-     model="gemini-2.5-flash-preview-04-17",
+    name="RagAgent",
+    # Using Gemini 2.5 Flash for best performance with RAG operations
+    model="gemini-2.5-flash-preview-04-17",
     description="Vertex AI RAG Agent",
     tools=[
         rag_query,
         list_corpora,
-        get_corpus_info,
         create_corpus,
-        delete_corpus,
         add_data,
-        delete_document
+        get_corpus_info,
+        delete_corpus,
+        delete_document,
     ],
-     instruction="""
+    instruction="""
     # 🧠 Vertex AI RAG Agent
 
     You are a helpful RAG (Retrieval Augmented Generation) agent that can interact with Vertex AI's document corpora.
@@ -111,5 +112,4 @@ root_agent = Agent(
     
     Remember, your primary goal is to help users access and manage information through RAG capabilities.
     """,
-
 )
